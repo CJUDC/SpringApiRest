@@ -1,5 +1,6 @@
-package com.cjcm.spring_boot_cero_a_experto;
+package com.cjcm.spring_boot_cero_a_experto.product.infrastructure;
 
+import com.cjcm.spring_boot_cero_a_experto.Product;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,7 +11,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/products")
-public class ProductController {
+public class ProductController implements ProductApi {
 
     List<Product> products;
 
