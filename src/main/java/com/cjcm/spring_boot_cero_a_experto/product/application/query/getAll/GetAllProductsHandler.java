@@ -1,27 +1,35 @@
-package com.cjcm.spring_boot_cero_a_experto.product.application.query.getById;
+package com.cjcm.spring_boot_cero_a_experto.product.application.query.getAll;
 
 import com.cjcm.spring_boot_cero_a_experto.common.mediator.RequestHandler;
-import com.cjcm.spring_boot_cero_a_experto.product.domain.Product;
-import com.cjcm.spring_boot_cero_a_experto.product.domain.ProductRepository;
+import com.cjcm.spring_boot_cero_a_experto.product.domain.entity.Product;
+import com.cjcm.spring_boot_cero_a_experto.product.domain.port.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class GetProductByIdHandler implements RequestHandler<GetProductByIdRequest, GetProductByIdResponse> {
+@Slf4j
+public class GetAllProductsHandler implements RequestHandler<GetAllProductsRequest, GetAllProductsResponse> {
 
     private final ProductRepository productRepository;
 
     @Override
-    public GetProductByIdResponse handle(GetProductByIdRequest request) {
+    public GetAllProductsResponse handle(GetAllProductsRequest request) {
 
-        Product product = productRepository.findById(request.getId()).orElseThrow(() -> new IllegalArgumentException("Product not found"));
+        log.info("Getting all products on Application layer");
 
-        return new GetProductByIdResponse(product);
+        List<Product> products = productRepository.findAll();
+
+        log.info("Found {} products", products.size());
+
+        return new GetAllProductsResponse(products);
     }
 
     @Override
-    public Class<GetProductByIdRequest> getRequestType() {
-        return GetProductByIdRequest.class;
+    public Class<GetAllProductsRequest> getRequestType() {
+        return GetAllProductsRequest.class;
     }
 }

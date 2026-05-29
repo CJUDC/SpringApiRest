@@ -1,4 +1,7 @@
 package com.cjcm.spring_boot_cero_a_experto.common.mediator;
 
-public interface RequestHandler {
+public interface RequestHandler<T extends Request<R>, R> {
+    R handle(T request);
+
+    Class<T> getRequestType();
 }

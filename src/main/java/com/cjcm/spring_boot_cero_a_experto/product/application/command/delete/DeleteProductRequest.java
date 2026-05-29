@@ -1,14 +1,12 @@
-package com.cjcm.spring_boot_cero_a_experto.product.application.command.create;
+package com.cjcm.spring_boot_cero_a_experto.product.application.command.delete;
 
 import com.cjcm.spring_boot_cero_a_experto.common.mediator.Request;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
-public class CreateProductRequest implements Request<Void> {
+@AllArgsConstructor
+public class DeleteProductRequest implements Request<Void> {
 
     private Long id;
-    private String name;
-    private String description;
-    private Double price;
-    private String image;
 }

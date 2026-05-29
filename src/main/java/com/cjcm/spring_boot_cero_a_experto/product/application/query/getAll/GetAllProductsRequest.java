@@ -1,13 +1,11 @@
-package com.cjcm.spring_boot_cero_a_experto.product.application.query.getById;
+package com.cjcm.spring_boot_cero_a_experto.product.application.query.getAll;
 
 import com.cjcm.spring_boot_cero_a_experto.common.mediator.Request;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class GetProductByIdRequest implements Request<GetProductByIdResponse> {
+public class GetAllProductsRequest implements Request<GetAllProductsResponse> {
 
-    private Long id;
 }

@@ -1,69 +1,101 @@
-package com.cjcm.spring_boot_cero_a_experto.product.infrastructure;
+package com.cjcm.spring_boot_cero_a_experto.product.infrastructure.api;
 
-import com.cjcm.spring_boot_cero_a_experto.Product;
+import com.cjcm.spring_boot_cero_a_experto.common.mediator.Mediator;
+import com.cjcm.spring_boot_cero_a_experto.product.application.command.create.CreateProductRequest;
+import com.cjcm.spring_boot_cero_a_experto.product.application.command.delete.DeleteProductRequest;
+import com.cjcm.spring_boot_cero_a_experto.product.application.command.update.UpdateProductRequest;
+import com.cjcm.spring_boot_cero_a_experto.product.application.query.getAll.GetAllProductsRequest;
+import com.cjcm.spring_boot_cero_a_experto.product.application.query.getAll.GetAllProductsResponse;
+import com.cjcm.spring_boot_cero_a_experto.product.application.query.getById.GetProductByIdRequest;
+import com.cjcm.spring_boot_cero_a_experto.product.application.query.getById.GetProductByIdResponse;
+import com.cjcm.spring_boot_cero_a_experto.product.infrastructure.api.dto.CreateProductDto;
+import com.cjcm.spring_boot_cero_a_experto.product.infrastructure.api.dto.ProductDto;
+import com.cjcm.spring_boot_cero_a_experto.product.infrastructure.api.dto.UpdateProductDto;
+import com.cjcm.spring_boot_cero_a_experto.product.infrastructure.api.mapper.ProductMapper;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/products")
+@RequiredArgsConstructor
+@Slf4j
 public class ProductController implements ProductApi {
 
-    List<Product> products;
+    private final Mediator mediator;
 
-    public ProductController() {
-        this.products = new ArrayList<>();
-        products.add(Product.builder().id(1L).name("Product 1").description("description").price(100.0).image("Image 1").build());
-        products.add(Product.builder().id(2L).name("Product 2").description("description 2").price(200.0).image("Image 2").build());
-    }
-
-
+    private final ProductMapper productMapper;
 
     @GetMapping("")
-    public ResponseEntity<List<Product>> getAllProduct(@RequestParam(required = false) String pageSize){
-        return ResponseEntity.ok(products);
+    public ResponseEntity<List<ProductDto>> getAllProduct(@RequestParam(required = false) String pageSize){
+
+        log.info("Getting all products");
+
+        GetAllProductsResponse response = mediator.dispatch(new GetAllProductsRequest());
+
+        List<ProductDto> productDtos = response.getProducts().stream().map(productMapper::mapToProduct).toList();
+
+        log.info("Found {} products", productDtos.size());
+
+        return ResponseEntity.ok(productDtos);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable Long id){
-        Optional<Product> productOptional = products.stream()
-                .filter(p -> p.getId().equals(id))
-                .findFirst();
+    public ResponseEntity<ProductDto> getProductById(@PathVariable Long id){
 
-        if(productOptional.isEmpty()){
-            return ResponseEntity.notFound().build();
-        }
+        log.info("Getting product by id");
 
-        return ResponseEntity.ok(productOptional.get());
+        GetProductByIdResponse response = mediator.dispatch(new GetProductByIdRequest(id));
+
+        ProductDto productDto = productMapper.mapToProduct(response.getProduct());
+
+        log.info("Found product with id {}", id);
+
+        return ResponseEntity.ok(productDto);
     }
 
     @PostMapping("")
-    public ResponseEntity<Void> saveProduct(@RequestBody Product product){
-        products.add(product);
-        return ResponseEntity.created(URI.create("/api/v1/products/" + product.getId())).build();
+    public ResponseEntity<Void> saveProduct(@ModelAttribute @Valid CreateProductDto productDto){
+
+        log.info("Saving product with id {}", productDto.getId());
+
+        CreateProductRequest request = productMapper.mapToCreateProductRequest(productDto);
+
+        mediator.dispatch(request);
+
+        log.info("Saved product with id {}", productDto.getId());
+
+        return ResponseEntity.created(URI.create("/api/v1/products/".concat(productDto.getId().toString()))).build();
     }
 
     @PutMapping("")
-    public ResponseEntity<Product> updateProduct(@RequestBody Product product){
-        Product productSelected = products.stream()
-                .filter(p -> p.getId().equals(product.getId())).findFirst()
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+    public ResponseEntity<Void> updateProduct(@ModelAttribute @Valid UpdateProductDto productDto){
 
-        productSelected.setName(product.getName());
-        productSelected.setDescription(product.getDescription());
-        productSelected.setPrice(product.getPrice());
-        productSelected.setImage(product.getImage());
+        log.info("Updating product with id {}", productDto.getId());
 
-        return ResponseEntity.ok(productSelected);
+        UpdateProductRequest request = productMapper.mapToUpdateProductRequest(productDto);
+
+        mediator.dispatch(request);
+
+        log.info("Updated product with id {}", productDto.getId());
+
+        return ResponseEntity.accepted().build();
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id){
-        products.removeIf(p -> p.getId().equals(id));
+
+        log.info("Deleting product with id {}", id);
+
+        mediator.dispatchAsync(new DeleteProductRequest(id));
+
+        log.info("Deleted product with id {}", id);
+
         return ResponseEntity.noContent().build();
     }
 }

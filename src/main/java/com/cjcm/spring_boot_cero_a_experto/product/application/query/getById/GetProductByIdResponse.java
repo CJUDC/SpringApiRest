@@ -1,11 +1,13 @@
-package com.cjcm.spring_boot_cero_a_experto.product.application.query;
+package com.cjcm.spring_boot_cero_a_experto.product.application.query.getById;
 
-import com.cjcm.spring_boot_cero_a_experto.product.domain.Product;
+import com.cjcm.spring_boot_cero_a_experto.product.domain.entity.Product;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
+@AllArgsConstructor
 public class GetProductByIdResponse{
 
     private Product product;

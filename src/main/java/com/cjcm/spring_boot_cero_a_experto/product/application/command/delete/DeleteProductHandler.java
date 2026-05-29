@@ -1,36 +1,33 @@
-package com.cjcm.spring_boot_cero_a_experto.product.application.command.create;
+package com.cjcm.spring_boot_cero_a_experto.product.application.command.delete;
 
 import com.cjcm.spring_boot_cero_a_experto.common.mediator.RequestHandler;
-import com.cjcm.spring_boot_cero_a_experto.product.domain.Product;
-import com.cjcm.spring_boot_cero_a_experto.product.domain.ProductRepository;
+import com.cjcm.spring_boot_cero_a_experto.product.domain.port.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class CreateProductHandler implements RequestHandler<CreateProductRequest, Void> {
+@Slf4j
+public class DeleteProductHandler implements RequestHandler<DeleteProductRequest, Void> {
 
 
     private final ProductRepository productRepository;;
 
     @Override
-    public Void handle(CreateProductRequest request) {
+    public Void handle(DeleteProductRequest request) {
 
-        Product product = Product.builder()
-                .id(request.getId())
-                .name(request.getName())
-                .description(request.getDescription())
-                .price(request.getPrice())
-                .image(request.getImage())
-                .build();
+        log.info("Deleting product with id {}", request.getId());
 
-        productRepository.upsert(product);
+        productRepository.deleteById(request.getId());
+
+        log.info("Deleted product with id {}", request.getId());
 
         return null;
     }
 
     @Override
-    public Class<CreateProductRequest> getRequestType() {
-        return CreateProductRequest.class;
+    public Class<DeleteProductRequest> getRequestType() {
+        return DeleteProductRequest.class;
     }
 }
