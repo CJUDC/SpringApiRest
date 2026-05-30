@@ -15,6 +15,7 @@ import com.cjcm.spring_boot_cero_a_experto.product.infrastructure.api.mapper.Pro
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,7 +39,7 @@ public class ProductController implements ProductApi {
 
         GetAllProductsResponse response = mediator.dispatch(new GetAllProductsRequest());
 
-        List<ProductDto> productDtos = response.getProducts().stream().map(productMapper::mapToProduct).toList();
+        List<ProductDto> productDtos = response.getProducts().stream().map(productMapper::mapToProductDto).toList();
 
         log.info("Found {} products", productDtos.size());
 
@@ -52,7 +53,7 @@ public class ProductController implements ProductApi {
 
         GetProductByIdResponse response = mediator.dispatch(new GetProductByIdRequest(id));
 
-        ProductDto productDto = productMapper.mapToProduct(response.getProduct());
+        ProductDto productDto = productMapper.mapToProductDto(response.getProduct());
 
         log.info("Found product with id {}", id);
 
@@ -88,6 +89,7 @@ public class ProductController implements ProductApi {
     }
 
     @DeleteMapping("/{id}")
+    @CacheEvict(value = "products", key = "#id")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id){
 
         log.info("Deleting product with id {}", id);
